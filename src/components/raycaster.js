@@ -48,7 +48,7 @@ module.exports.Component = registerComponent('raycaster', {
     var cursorPosition = new THREE.Vector3().setFromMatrixPosition(cursor.matrixWorld);
     var direction = cursorPosition.sub(originPosition).normalize();
     raycaster.set(originPosition, direction);
-    return raycaster.intersectObjects(objects, true);
+    return raycaster.intersectObjects(objects, false);
   },
 
   /**
@@ -63,7 +63,25 @@ module.exports.Component = registerComponent('raycaster', {
     var scene = this.el.sceneEl.object3D;
     var cursorEl = this.el;
     var intersectedObj;
-    var intersectedObjs = this.intersect(scene.children);
+
+    function filterObjs() {
+      var objsToIntersect = [];
+
+      function recurseChildren(children) {
+        for(var i = 0; i < children.length; ++i) {
+          var obj = children[i];
+          if(!obj.ignoreRaycaster) {
+            objsToIntersect.push(obj);
+          }
+          recurseChildren(obj.children);
+        }
+      }
+
+      recurseChildren(scene.children);
+      return objsToIntersect;
+    }
+
+    var intersectedObjs = this.intersect(filterObjs());
     for (var i = 0; i < intersectedObjs.length; ++i) {
       intersectedObj = intersectedObjs[i];
       // If the intersected object is the cursor itself
