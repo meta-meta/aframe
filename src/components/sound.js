@@ -120,6 +120,8 @@ module.exports.Component = registerComponent('sound', {
 
   pause: function () {
     if (!this.sound.source.buffer) { return; }
-    this.sound.pause();
+    if(this.sound.isPlaying) {
+      this.sound.pause();
+    }
   }
 });
